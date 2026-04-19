@@ -1,0 +1,60 @@
+# --- Environment Variables (CRITICAL) ---
+.env
+env/
+.venv/
+venv/
+ENV/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Docker ---
+# We keep docker-compose.yml but ignore local data volumes
+.docker/
+# If you ever use local postgres in docker, ignore the data folder
+pgdata/
+
+# --- Databases ---
+# If you ever use a local SQLite for testing
+*.db
+*.sqlite3
+
+# --- OS & Editors ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.vscode/
+.idea/
+
+# --- App Specific ---
+# Ignore locally generated PDF or Audio files 
+# (These should be in Supabase, not your Git repo)
+temp/
+static/uploads/
+*.pdf
+*.mp3

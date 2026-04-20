@@ -1,15 +1,54 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, status, Form
 from dotenv import load_dotenv
-import psycopg2
-import os
+from sqlalchemy.orm import Session
+from db import get_db,engine,Base
+from models import Note
+import cloudinary.uploader
+from fastapi.middleware.cors import CORSMiddleware
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-connection = psycopg2.connect(DATABASE_URL)
-load_dotenv()
+Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], # Be specific to your Vite port
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/")
 def health_check():
-    return {"message" : "API working good"}
+    return {"message": "API working good"}
 
+
+@app.post("/add_notes")
+def add_notes(
+    title: str = Form(...),
+    unit: str = Form(None),
+    subject: str = Form(...),
+    semester: str = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    result = cloudinary.uploader.upload(
+        file=file.file,
+        resource_type="raw",
+        public_id=f"user_docs/{title.replace(' ', '_')}",
+        overwrite=True,
+    )
+
+    db_notes = Note(
+        title=title,
+        unit=unit,
+        subject=subject,
+        semester=semester,
+        pdf_url=result.get("secure_url"),
+    )
+    db.add(db_notes)
+    db.commit()
+    db.refresh(db_notes)
+
+    return {"message": "Notes added successfully"}

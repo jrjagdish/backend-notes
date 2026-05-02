@@ -1,3 +1,4 @@
+import uuid
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, status, Form
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
@@ -22,6 +23,8 @@ app.add_middleware(
 @app.get("/")
 def health_check():
     return {"message": "API working good"}
+
+
 
 
 @app.post("/add_notes")
@@ -52,3 +55,15 @@ def add_notes(
     db.refresh(db_notes)
 
     return {"message": "Notes added successfully"}
+
+@app.get("/notes/{note_id}")
+def get_note(note_id: uuid.UUID, db: Session = Depends(get_db)):
+    note = db.query(Note).filter(Note.id == note_id).first()
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    return note.pdf_url
+
+@app.get("/notes")
+def get_all_notes(db: Session = Depends(get_db)):
+    notes = db.query(Note).all()
+    return notes
